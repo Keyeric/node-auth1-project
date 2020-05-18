@@ -11,6 +11,6 @@ module.exports = {
       httpOnly: true,
     },
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: process.env.ALLOWED_COOKIES || false,
   },
 };

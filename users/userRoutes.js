@@ -19,11 +19,17 @@ router.post("/register", (req, res) => {
 
   const hash = bcrypt.hashSync(credentials.password, rounds);
   credentials.password = hash;
-
+  console.log(credentials);
+  /*
+  func
+    .findBy({ username })
+    .then(([creds]) => {
+      if (!creds.username) {
+      */
   if (
     credentials.username &&
-    credentials.password
-    // && typeof credentials.password === "string"
+    credentials.password &&
+    typeof credentials.password === "string"
   ) {
     func
       .register(credentials)
@@ -42,6 +48,20 @@ router.post("/register", (req, res) => {
       .status(400)
       .json({ message: `Please add a name and alphanumeric password` });
   }
+  /*
+      } else {
+        res.status(400).json({
+          message: "Username is taken, please choose another",
+        });
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({
+        message: "Error finding username",
+        error: error,
+      });
+    });
+     */
 });
 
 router.post("/login", (req, res) => {
@@ -50,8 +70,7 @@ router.post("/login", (req, res) => {
 
   func
     .findBy({ username })
-    .first()
-    .then((user) => {
+    .then(([user]) => {
       if (user && bcrypt.compareSync(password, user.password)) {
         const token = generateToken(user);
 
