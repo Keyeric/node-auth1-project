@@ -15,43 +15,49 @@ router.get("/", (req, res) => {
 
 router.post("/register", (req, res) => {
   const credentials = req.body;
+  console.log("req body", req.body);
+  console.log("\n unval creds \n", credentials);
+  func
+    .findBy(credentials.username)
+    .then((body) => {
+      if (!body[0]) {
+        if (
+          credentials.username &&
+          credentials.password &&
+          typeof credentials.password === "string"
+        ) {
+          const rounds = process.env.BCRYPT_ROUNDS || 12;
+          const hash = bcrypt.hashSync(credentials.password, rounds);
+          credentials.password = hash;
 
-  if (
-    credentials.username &&
-    credentials.password &&
-    typeof credentials.password === "string"
-  ) {
-    const rounds = process.env.BCRYPT_ROUNDS || 12;
-    const hash = bcrypt.hashSync(credentials.password, rounds);
-    credentials.password = hash;
-
-    func
-      .register(credentials)
-      .then((newUser) => {
-        res.status(201).json(newUser);
-      })
-      .catch((error) => {
-        console.log(error);
-
-        let message = "an error has occured";
-        /*
-
-        if (error.detail && error.detail.includes("already exists")) {
-          message = "That username is taken, please choose another";
+          console.log("\n val creds \n", credentials);
+          console.log("\n hashpass\n ", credentials.password);
+          func
+            .register(credentials)
+            .then((newUser) => {
+              console.log("\n newUser \n", newUser);
+              res.status(201).json(newUser);
+            })
+            .catch((error) => {
+              console.log("\n Error \n", error);
+            });
         } else {
-          message = "server error creating a new user";
+          res
+            .status(400)
+            .json({ message: `Please add a name and alphanumeric password` });
         }
-
-        */
+      } else {
         res.status(500).json({
-          message: message,
+          message: "That username is taken, please choose another",
         });
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({
+        message: "server error creating a new user",
+        error: error,
       });
-  } else {
-    res
-      .status(400)
-      .json({ message: `Please add a name and alphanumeric password` });
-  }
+    });
 });
 
 router.post("/login", (req, res) => {
@@ -59,7 +65,7 @@ router.post("/login", (req, res) => {
   req.session.username = username;
 
   func
-    .findBy({ username })
+    .findBy(username)
     .then(([user]) => {
       if (user && bcrypt.compareSync(password, user.password)) {
         const token = generateToken(user);

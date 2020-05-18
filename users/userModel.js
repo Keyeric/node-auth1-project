@@ -11,8 +11,9 @@ function find() {
   return db("users");
 }
 
-function findBy(param) {
-  return db("users").where(param);
+function findBy(username) {
+  console.log("Hi!");
+  return db("users").where({ username });
 }
 
 function findByID(id) {
@@ -21,8 +22,8 @@ function findByID(id) {
 
 function register(person) {
   return db("users")
-    .insert(person)
-    .then((newUser) => {
-      return findByID(newUser[0]);
+    .insert(person, "*")
+    .then(([newUser]) => {
+      return newUser;
     });
 }
