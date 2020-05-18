@@ -15,22 +15,16 @@ router.get("/", (req, res) => {
 
 router.post("/register", (req, res) => {
   const credentials = req.body;
-  const rounds = process.env.BCRYPT_ROUNDS || 13;
 
-  const hash = bcrypt.hashSync(credentials.password, rounds);
-  credentials.password = hash;
-  console.log(credentials);
-  /*
-  func
-    .findBy({ username })
-    .then(([creds]) => {
-      if (!creds.username) {
-      */
   if (
     credentials.username &&
     credentials.password &&
     typeof credentials.password === "string"
   ) {
+    const rounds = process.env.BCRYPT_ROUNDS || 12;
+    const hash = bcrypt.hashSync(credentials.password, rounds);
+    credentials.password = hash;
+
     func
       .register(credentials)
       .then((newUser) => {
@@ -38,9 +32,19 @@ router.post("/register", (req, res) => {
       })
       .catch((error) => {
         console.log(error);
+
+        let message = "an error has occured";
+        /*
+
+        if (error.detail && error.detail.includes("already exists")) {
+          message = "That username is taken, please choose another";
+        } else {
+          message = "server error creating a new user";
+        }
+
+        */
         res.status(500).json({
-          message: "server error creating a new user",
-          error: error,
+          message: message,
         });
       });
   } else {
@@ -48,20 +52,6 @@ router.post("/register", (req, res) => {
       .status(400)
       .json({ message: `Please add a name and alphanumeric password` });
   }
-  /*
-      } else {
-        res.status(400).json({
-          message: "Username is taken, please choose another",
-        });
-      }
-    })
-    .catch((error) => {
-      res.status(500).json({
-        message: "Error finding username",
-        error: error,
-      });
-    });
-     */
 });
 
 router.post("/login", (req, res) => {
